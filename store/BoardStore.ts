@@ -1,3 +1,4 @@
+import { getTodosGroupedByColumn } from '@/library/getTodosGroupedByColumn';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
@@ -6,7 +7,7 @@ interface BoardState {
   getBoard: () => void;
 }
 
-const useBearStore = create((set) => ({
+export const useBoardStore = create((set) => ({
   board: {
     columns: new Map<TypedColumn, Column>(),
   },
