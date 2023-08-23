@@ -5,7 +5,7 @@ import React from 'react';
 import {
   DraggableProvidedDragHandleProps,
   DraggableProvidedDraggableProps,
-} from 'react-beautiful-dnd';
+} from '@hello-pangea/dnd';
 import { createEmitAndSemanticDiagnosticsBuilderProgram } from 'typescript';
 
 type Props = {

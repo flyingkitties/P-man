@@ -1,5 +1,5 @@
 import React from 'react';
-import { Draggable, Droppable } from 'react-beautiful-dnd';
+import { Draggable, Droppable } from '@hello-pangea/dnd';
 import TodoCard from './TodoCard';
 import { PlusCircleIcon } from '@heroicons/react/20/solid';
 
