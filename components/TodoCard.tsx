@@ -7,6 +7,7 @@ import {
   DraggableProvidedDraggableProps,
 } from '@hello-pangea/dnd';
 import { createEmitAndSemanticDiagnosticsBuilderProgram } from 'typescript';
+import { useBoardStore } from '@/store/BoardStore';
 
 type Props = {
   todo: Todo;
@@ -24,6 +25,7 @@ function TodoCard({
   draggableProps,
   dragHandleProps,
 }: Props) {
+  const deleteTask = useBoardStore((state) => state.deleteTask);
   return (
     <div
       className="bg-white rounded-md space-y-2 drop-shadow-md"
@@ -33,7 +35,7 @@ function TodoCard({
     >
       <div className="flex justify-between items-center p-5 md:p-2 my-2">
         <p>{todo.title}</p>
-        <button>
+        <button onClick={() => deleteTask(index, todo, id)}>
           <XCircleIcon className="h-5 w-5 text-red-400" />
         </button>
       </div>
