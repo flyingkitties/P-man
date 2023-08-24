@@ -1,13 +1,36 @@
 'use client';
 
 import Image from 'next/image';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import logo from '@/public/logo.png';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import Avatar from 'react-avatar';
 import { UserCircleIcon } from '@heroicons/react/20/solid';
+import { useBoardStore } from '@/store/BoardStore';
+import fetchSuggestion from '@/lib/fetchSuggestion';
 
 function Header() {
+  const [board, searchString, setSearchString] = useBoardStore((state: any) => [
+    state.board,
+    state.searchString,
+    state.setSearchString,
+  ]);
+
+  const [loading, setLoading] = useState<boolean>(false);
+  const [sugestion, setSugestion] = useState<string>('');
+
+  useEffect(() => {
+    if (board.columns.size === 0) return;
+    setLoading(true);
+
+    const fetchSuggestionFunc = async () => {
+      const suggestion = await fetchSuggestion(board);
+      setSugestion(suggestion);
+      setLoading(false);
+    };
+    fetchSuggestionFunc();
+  }, [board]);
+
   return (
     <header>
       <div
@@ -40,10 +63,16 @@ function Header() {
             <input
               type="text"
               placeholder="Search"
+              value={searchString}
+              onChange={(e) => setSearchString(e.target.value)}
               className="flex-1 outline-none p-1 font-light"
             />
 
-            <button type="submit">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+              }}
+            >
               <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 " />
             </button>
           </form>
@@ -68,8 +97,11 @@ function Header() {
           className="inline-flex items-center text-sm font-light
          bg-white rounded-md shadow-lg p-3"
         >
-          <UserCircleIcon className="w-7 h-7 text-[#D1A6E8] mr-1" />
-          GPT is optimizing your day...
+          <UserCircleIcon
+            className={`w-7 h-7 text-[#D1A6E8] mr-1
+          ${loading && 'animate-spin'}`}
+          />
+          {sugestion && !loading ? sugestion : 'GPT is optimizing your day...'}
         </p>
       </div>
     </header>
