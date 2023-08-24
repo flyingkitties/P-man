@@ -10,7 +10,7 @@ import { useBoardStore } from '@/store/BoardStore';
 import fetchSuggestion from '@/lib/fetchSuggestion';
 
 function Header() {
-  const [board, searchString, setSearchString] = useBoardStore((state: any) => [
+  const [board, searchString, setSearchString] = useBoardStore((state) => [
     state.board,
     state.searchString,
     state.setSearchString,
@@ -19,17 +19,18 @@ function Header() {
   const [loading, setLoading] = useState<boolean>(false);
   const [sugestion, setSugestion] = useState<string>('');
 
-  useEffect(() => {
-    if (board.columns.size === 0) return;
-    setLoading(true);
+  // uncomment in the end
+  //   useEffect(() => {
+  //     if (board.columns.size === 0) return;
+  //     setLoading(true);
 
-    const fetchSuggestionFunc = async () => {
-      const suggestion = await fetchSuggestion(board);
-      setSugestion(suggestion);
-      setLoading(false);
-    };
-    fetchSuggestionFunc();
-  }, [board]);
+  //     const fetchSuggestionFunc = async () => {
+  //       const suggestion = await fetchSuggestion(board);
+  //       setSugestion(suggestion);
+  //       setLoading(false);
+  //     };
+  //     fetchSuggestionFunc();
+  //   }, [board]);
 
   return (
     <header>

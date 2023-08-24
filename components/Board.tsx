@@ -9,7 +9,7 @@ import { number } from 'prop-types';
 
 function Board() {
   const [board, getBoard, setBoardState, updateTodoInDB] = useBoardStore(
-    (state: any) => [
+    (state) => [
       state.board,
       state.getBoard,
       state.setBoardState,
