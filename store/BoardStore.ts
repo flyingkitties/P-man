@@ -1,7 +1,7 @@
-import { databases, storage } from '@/appWrite';
+import { ID, databases, storage } from '@/appWrite';
 import { getTodosGroupedByColumn } from '@/lib/getTodosGroupedByColumn';
+import uploadImage from '@/lib/uploadImage';
 import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
 
 export interface BoardState {
   board: Board;
@@ -12,8 +12,6 @@ export interface BoardState {
   searchString: string;
   setSearchString: (searchString: string) => void;
 
-  deleteTask: (taskIndex: number, todo: Todo, id: TypedColumn) => void;
-
   newTaskInput: string;
   setNewTaskInput: (input: string) => void;
 
@@ -22,6 +20,9 @@ export interface BoardState {
 
   image: File | null;
   setImage: (image: File | null) => void;
+
+  addTask: (todo: string, columnId: TypedColumn, image?: File | null) => void;
+  deleteTask: (taskIndex: number, todo: Todo, id: TypedColumn) => void;
 }
 
 export const useBoardStore = create<BoardState>((set, get) => ({
@@ -53,6 +54,7 @@ export const useBoardStore = create<BoardState>((set, get) => ({
       {
         title: todo.title,
         status: columnId,
+        image: todo.image, // test mode
       },
     );
   },
@@ -74,5 +76,68 @@ export const useBoardStore = create<BoardState>((set, get) => ({
       process.env.NEXT_PUBLIC_TODOS_COLLECTION_ID!,
       todo.$id,
     );
+  },
+
+  addTask: async (todo: string, columnId: TypedColumn, image?: File | null) => {
+    let file: Image | undefined;
+
+    // If there's an image - store it in Image bucket
+    if (image) {
+      const fileUploaded = await uploadImage(image);
+
+      if (fileUploaded) {
+        file = {
+          bucketId: fileUploaded.bucketId,
+          fileId: fileUploaded.$id,
+        };
+      }
+    }
+    console.log('creating new task');
+    try {
+      // Create the new task document
+      const { $id } = await databases.createDocument(
+        process.env.NEXT_PUBLIC_DATABASE_ID!,
+        process.env.NEXT_PUBLIC_TODOS_COLLECTION_ID!,
+        ID.unique(),
+        {
+          title: todo,
+          status: columnId,
+          // Include image of there's one and stringify
+          ...(file && { image: JSON.stringify(file) }),
+        },
+      );
+
+      set({ newTaskInput: '' });
+
+      set((state) => {
+        const newColumnsCopy = new Map(state.board.columns);
+
+        const newTodo: Todo = {
+          $id,
+          $createdAt: new Date().toISOString(),
+          title: todo,
+          status: columnId,
+          // Image if there's one
+          ...(file && { image: file }),
+        };
+        // which column was selected?
+        const column = newColumnsCopy.get(columnId);
+        if (!column) {
+          newColumnsCopy.set(columnId, {
+            id: columnId,
+            todos: [newTodo],
+          });
+        } else {
+          newColumnsCopy.get(columnId)?.todos.push(newTodo);
+        }
+        return {
+          board: {
+            columns: newColumnsCopy,
+          },
+        };
+      });
+    } catch (error) {
+      console.log(error);
+    }
   },
 }));

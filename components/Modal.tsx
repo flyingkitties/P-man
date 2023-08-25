@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useRef } from 'react';
+import { FormEvent, Fragment, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { useModalStore } from '@/store/ModalStore';
 import { useBoardStore } from '@/store/BoardStore';
@@ -12,23 +12,37 @@ function Modal(closeOnClickingOutside: any) {
   // global state for modal opening
   const [isOpen, closeModal] = useModalStore((state) => [
     state.isOpen,
-    state.openModal,
     state.closeModal,
   ]);
 
-  const [newTaskInput, setNewTaskInput, image, setImage] = useBoardStore(
-    (state) => [
+  const [addTask, newTaskInput, setNewTaskInput, image, setImage, newTaskType] =
+    useBoardStore((state) => [
+      state.addTask,
       state.newTaskInput,
       state.setNewTaskInput,
       state.image,
       state.setImage,
-    ],
-  );
+      state.newTaskType,
+    ]);
 
   const imagePicker = useRef<HTMLInputElement>(null);
 
   const Overlay = closeOnClickingOutside ? 'div' : Dialog.Panel;
   const Content = closeOnClickingOutside ? Dialog.Panel : 'div';
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    // No input just return
+    if (!newTaskInput) return;
+
+    console.log('inside handler');
+
+    // Add task to board DB
+    addTask(newTaskInput, newTaskType, image);
+
+    setImage(null);
+    closeModal();
+  };
 
   return (
     <Transition
@@ -38,6 +52,7 @@ function Modal(closeOnClickingOutside: any) {
     >
       <Dialog
         as="form"
+        onSubmit={handleSubmit}
         className="relative z-30"
         open={isOpen}
         onClose={closeModal}
@@ -92,33 +107,45 @@ function Modal(closeOnClickingOutside: any) {
                     onClick={() => {
                       imagePicker.current?.click();
                     }}
-                    className={` w-full border border-gray-300 rounded-md outline-none
-                   focus-visible:ring-2 focus-visible:ring-purple-400/80  focus-visible:ring-offset-2
+                    className={`w-full rounded-md outline-none focus-visible:ring-2 
+                    focus-visible:ring-purple-400/80 focus-visible:ring-offset-2
                    ring-offset-pink-300/70 ${
-                     image ? 'bg-[#2A2F4F] text-white ' : 'px-5'
+                     image
+                       ? 'bg-[#2A2F4F] text-white rounded-t-md pb-1'
+                       : 'py-5 border border-gray-300 px-1'
                    }`}
                   >
                     {image ? (
-                      <div className="flex items-center justify-end mr-2 ">
-                        <XMarkIcon className="h-6 w-6 bg-red-300 " />
+                      <div
+                        className="flex items-center justify-end mr-2 my-1"
+                        onClick={() => {
+                          setImage(null);
+                        }}
+                      >
+                        <XMarkIcon className="h-6 w-6 bg-white/90 rounded-full text-[#2A2F4F] " />
                       </div>
                     ) : (
-                      <PhotoIcon className="h-6 w-6 mr-2 inline-block" />
+                      <div className="flex items-center justify-center text-[#2A2F4F]">
+                        <PhotoIcon className="h-6 w-6 mr-2 inline-block" />
+                        <p>Upload image</p>
+                      </div>
                     )}
                   </button>
                   {image && (
-                    <Image
-                      src={URL.createObjectURL(image)}
-                      alt='"Upload Image'
-                      width={200}
-                      height={200}
-                      className={`w-full h-44 object-cover mt-2 filter hover:grayscale 
+                    <div className="-mt-[5px]">
+                      <Image
+                        src={URL.createObjectURL(image)}
+                        alt='"Upload Image'
+                        width={200}
+                        height={200}
+                        className={`w-full h-44 object-cover -mt-[5px] filter hover:grayscale 
                      transition-all duration-150 cursor-not-allowed
                      }`}
-                      onClick={() => {
-                        setImage(null);
-                      }}
-                    />
+                        onClick={() => {
+                          setImage(null);
+                        }}
+                      />
+                    </div>
                   )}
                   <input
                     type="file"
@@ -143,10 +170,11 @@ function Modal(closeOnClickingOutside: any) {
                   <button
                     type="submit"
                     disabled={!newTaskInput}
-                    onClick={closeModal}
+                    // onClick={handleSubmit}
                     className="inline-flex justify-center rounded-md text-white bg-[#2A2F4F]
                      px-6 py-2 text-sm font-medium ring-2 ring-transparent hover:ring-2
-                      hover:ring-purple-400/80 ring-opacity-80 ring-offset-pink-300/70 leading-6"
+                      hover:ring-purple-400/80 ring-opacity-80 ring-offset-pink-300/70 leading-6
+                      disabled:text-gray-500"
                   >
                     Add Task
                   </button>

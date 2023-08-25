@@ -1,13 +1,17 @@
 'use client';
 
 import { XCircleIcon } from '@heroicons/react/20/solid';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   DraggableProvidedDragHandleProps,
   DraggableProvidedDraggableProps,
 } from '@hello-pangea/dnd';
 import { createEmitAndSemanticDiagnosticsBuilderProgram } from 'typescript';
 import { useBoardStore } from '@/store/BoardStore';
+import getURL from '@/lib/getURL';
+import Image from 'next/image';
+import { storage } from '@/appWrite';
+import { log } from 'console';
 
 type Props = {
   todo: Todo;
@@ -17,6 +21,7 @@ type Props = {
   draggableProps: DraggableProvidedDraggableProps;
   dragHandleProps: DraggableProvidedDragHandleProps | null | undefined;
 };
+
 function TodoCard({
   todo,
   index,
@@ -25,7 +30,27 @@ function TodoCard({
   draggableProps,
   dragHandleProps,
 }: Props) {
+  const [imageurl, setImageUrl] = useState<string | null>(null);
+
   const deleteTask = useBoardStore((state) => state.deleteTask);
+
+  useEffect(() => {
+    if (todo.image) {
+      const { image } = todo;
+
+      const imageObject = JSON.parse(image as unknown as string);
+
+      const fetchImage = async () => {
+        const url = await getURL(imageObject);
+        if (url) {
+          setImageUrl(url.toString());
+        }
+      };
+
+      fetchImage();
+    }
+  }, [todo]);
+
   return (
     <div
       className="bg-white rounded-md space-y-2 drop-shadow-md"
@@ -39,6 +64,18 @@ function TodoCard({
           <XCircleIcon className="h-5 w-5 text-red-400" />
         </button>
       </div>
+      {/* Image */}
+      {imageurl && (
+        <div className="h-full w-full rounded-b-md">
+          <Image
+            src={imageurl}
+            alt="task image"
+            width={400}
+            height={200}
+            className="w-full object-contain rounded-b-md"
+          />
+        </div>
+      )}
     </div>
   );
 }
