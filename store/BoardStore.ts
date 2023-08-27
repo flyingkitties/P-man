@@ -92,52 +92,48 @@ export const useBoardStore = create<BoardState>((set, get) => ({
         };
       }
     }
-    console.log('creating new task');
-    try {
-      // Create the new task document
-      const { $id } = await databases.createDocument(
-        process.env.NEXT_PUBLIC_DATABASE_ID!,
-        process.env.NEXT_PUBLIC_TODOS_COLLECTION_ID!,
-        ID.unique(),
-        {
-          title: todo,
-          status: columnId,
-          // Include image of there's one and stringify
-          ...(file && { image: JSON.stringify(file) }),
+
+    // Create the new task document
+    const { $id } = await databases.createDocument(
+      process.env.NEXT_PUBLIC_DATABASE_ID!,
+      process.env.NEXT_PUBLIC_TODOS_COLLECTION_ID!,
+      ID.unique(),
+      {
+        title: todo,
+        status: columnId,
+        // Include image of there's one and stringify
+        ...(file && { image: JSON.stringify(file) }),
+      },
+    );
+
+    set({ newTaskInput: '' });
+
+    set((state) => {
+      const newColumnsCopy = new Map(state.board.columns);
+
+      const newTodo: Todo = {
+        $id,
+        $createdAt: new Date().toISOString(),
+        title: todo,
+        status: columnId,
+        // Image if there's one
+        ...(file && { image: file }),
+      };
+      // which column was selected?
+      const column = newColumnsCopy.get(columnId);
+      if (!column) {
+        newColumnsCopy.set(columnId, {
+          id: columnId,
+          todos: [newTodo],
+        });
+      } else {
+        newColumnsCopy.get(columnId)?.todos.push(newTodo);
+      }
+      return {
+        board: {
+          columns: newColumnsCopy,
         },
-      );
-
-      set({ newTaskInput: '' });
-
-      set((state) => {
-        const newColumnsCopy = new Map(state.board.columns);
-
-        const newTodo: Todo = {
-          $id,
-          $createdAt: new Date().toISOString(),
-          title: todo,
-          status: columnId,
-          // Image if there's one
-          ...(file && { image: file }),
-        };
-        // which column was selected?
-        const column = newColumnsCopy.get(columnId);
-        if (!column) {
-          newColumnsCopy.set(columnId, {
-            id: columnId,
-            todos: [newTodo],
-          });
-        } else {
-          newColumnsCopy.get(columnId)?.todos.push(newTodo);
-        }
-        return {
-          board: {
-            columns: newColumnsCopy,
-          },
-        };
-      });
-    } catch (error) {
-      console.log(error);
-    }
+      };
+    });
   },
 }));

@@ -35,8 +35,6 @@ function Modal(closeOnClickingOutside: any) {
     // No input just return
     if (!newTaskInput) return;
 
-    console.log('inside handler');
-
     // Add task to board DB
     addTask(newTaskInput, newTaskType, image);
 
