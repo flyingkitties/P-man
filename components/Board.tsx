@@ -104,7 +104,7 @@ function Board() {
   };
 
   return (
-    <div className="px-5 lg:px-10 mt-2 md:mt-5">
+    <div className="px-10 mt-2 md:mt-5">
       <DragDropContext onDragEnd={handleOnDragEnd}>
         <Droppable
           droppableId="board"
@@ -113,7 +113,7 @@ function Board() {
         >
           {(provided) => (
             <div
-              className="grid grid-cols-1 md:grid-cols-3 gap-5 xl:gap-10 max-w-7xl mx-auto"
+              className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-10 xl:gap-12 max-w-7xl mx-auto"
               {...provided.droppableProps}
               ref={provided.innerRef}
             >

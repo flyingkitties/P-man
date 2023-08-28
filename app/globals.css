@@ -1,3 +1,16 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.menuList {
+  @apply w-52 space-y-2 md:space-y-4 lg:space-y-5;
+}
+.menuItem {
+  @apply flex items-center space-x-3 text-xs md:text-sm cursor-pointer p-1;
+}
+.menuDropIcon {
+  @apply h-6 w-6 text-[#D1A6E8];
+}
+.menuDropText {
+  @apply text-xs md:text-sm text-gray-600 hover:text-gray-800;
+}

@@ -99,7 +99,10 @@ function Column({ id, todos, index }: Props) {
                   {provided.placeholder}
 
                   <div className="flex items-end justify-end p-2">
-                    <button onClick={handleAddTodo}>
+                    <button
+                      onClick={handleAddTodo}
+                      aria-label="Add Task"
+                    >
                       <PlusCircleIcon className="h-5 w-5 text-green-500" />
                     </button>
                   </div>
